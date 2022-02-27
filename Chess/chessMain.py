@@ -1,5 +1,6 @@
 ## Responsible for handling user input
 
+from ipaddress import collapse_addresses
 import pygame as p
 import chessEngine
 
@@ -27,10 +28,29 @@ def main():
     gs = chessEngine.GameState()
     loadImages()
     running = True
+    squareSelected = () # tuple to keep track of the last clip of the user
+    playerClicks = [] # keeps track of player clicks
     while running:
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos() # gets the x,y position of the mouse
+                col = location[0] // SQ_SIZE
+                row = location[1] // SQ_SIZE
+                if squareSelected == (row, col): # user clicked the same square twice
+                    squareSelected = () # user unselected a piece
+                    playerClicks = [] # clear player clicks
+                else:
+                    squareSelected = (row, col)
+                    playerClicks.append(squareSelected)
+                if len(playerClicks) == 2: # after second click
+                    move = chessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    squareSelected = () # resets user click
+                    playerClicks = []
+                
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
@@ -55,7 +75,7 @@ def drawPieces(screen, board):
             piece = board[r][c]
             if piece != "--":
                 screen.blit(IMAGES[piece], p.Rect(c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
-                
+
 
 if __name__ == "__main__":
     main()
