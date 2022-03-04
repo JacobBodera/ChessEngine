@@ -26,6 +26,8 @@ def main():
     clock = p.time.Clock()
     screen.fill(p.Color("white"))
     gs = chessEngine.GameState()
+    validMoves = gs.getValidMoves()
+    moveMade = False # flag variable for when a move is made
     loadImages()
     running = True
     squareSelected = () # tuple to keep track of the last clip of the user
@@ -47,10 +49,20 @@ def main():
                 if len(playerClicks) == 2: # after second click
                     move = chessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
                     print(move.getChessNotation())
-                    gs.makeMove(move)
+                    if move in validMoves:
+                        gs.makeMove(move)
+                        moveMade = True
                     squareSelected = () # resets user click
                     playerClicks = []
-                
+            elif e.type == p.KEYDOWN:
+                if e.key == p.K_u:
+                    gs.undoMove()
+                    moveMade = True
+
+        if moveMade:
+            validMoves = gs.getValidMoves()
+            moveMade = False
+
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
