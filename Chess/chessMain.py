@@ -52,8 +52,10 @@ def main():
                     if move in validMoves:
                         gs.makeMove(move)
                         moveMade = True
-                    squareSelected = () # resets user click
-                    playerClicks = []
+                        squareSelected = () # resets user click
+                        playerClicks = []
+                    else:
+                        playerClicks = [squareSelected]
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_u:
                     gs.undoMove()

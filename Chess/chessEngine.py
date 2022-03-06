@@ -99,7 +99,15 @@ class GameState():
 
             
     def getKnightMoves(self, r, c, moves):
-        pass
+        directions = ((-2, -1), (-1,-2), (1, -2), (2, -1), (2, 1), (1, 2), (-1, 2), (-2, 1)) # NWu, NWd, SWu, SWd, SEd, SEu, NEd, NEu
+        enemyColour = "b" if self.whiteToMove else "w"
+        for d in directions:
+            endRow = r + d[0]
+            endCol = c + d[1]
+            if 0 <= endRow < 8 and 0 <= endCol < 8:
+                endPiece = self.board[endRow][endCol]
+                if endPiece == "--" or endPiece[0] == enemyColour:
+                    moves.append(Move((r, c), (endRow, endCol), self.board))
 
     def getBishopMoves(self, r, c, moves):
         directions = ((-1, -1), (1, -1), (1, 1), (-1, 1)) # NW, SW, SE, NE
@@ -121,35 +129,18 @@ class GameState():
                     break
 
     def getQueenMoves(self, r, c, moves):
-        directions = ((-1, 0), (0,-1), (1, 0), (0, 1), (-1, -1), (1, -1), (1, 1), (-1, 1))
-        enemyColour = "b" if self.whiteToMove else "w"
-        for d in directions:
-            for i in range(1,8):
-                endRow = r + d[0] * i
-                endCol = c + d[1] * i
-                if 0 <= endRow < 8 and 0 <= endCol < 8:
-                    endPiece = self.board[endRow][endCol]
-                    if endPiece == "--":
-                        moves.append(Move((r, c), (endRow, endCol), self.board))
-                    elif endPiece[0] == enemyColour:
-                        moves.append(Move((r, c), (endRow, endCol), self.board))
-                        break
-                    else:
-                        break
-                else:
-                    break
+        self.getRookMoves(r, c, moves)
+        self.getBishopMoves(r, c, moves)
 
     def getKingMoves(self, r, c, moves):
-        directions = ((-1, 0), (0,-1), (1, 0), (0, 1), (-1, -1), (1, -1), (1, 1), (-1, 1))
+        directions = ((-1, 0), (0,-1), (1, 0), (0, 1), (-1, -1), (1, -1), (1, 1), (-1, 1)) # N, W, S, E, NW, SW, SE, NE
         enemyColour = "b" if self.whiteToMove else "w"
-        for d in directions:
-            endRow = r + d[0]
-            endCol = c + d[1]
+        for i in range(8):
+            endRow = r + directions[i][0]
+            endCol = c + directions[i][1]
             if 0 <= endRow < 8 and 0 <= endCol < 8:
                 endPiece = self.board[endRow][endCol]
-                if endPiece == "--":
-                    moves.append(Move((r, c), (endRow, endCol), self.board))
-                elif endPiece[0] == enemyColour:
+                if endPiece == "--" or endPiece[0] == enemyColour:
                     moves.append(Move((r, c), (endRow, endCol), self.board))
 
 class Move():
