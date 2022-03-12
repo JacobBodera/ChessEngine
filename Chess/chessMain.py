@@ -49,12 +49,13 @@ def main():
                 if len(playerClicks) == 2: # after second click
                     move = chessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
                     print(move.getChessNotation())
-                    if move in validMoves:
-                        gs.makeMove(move)
-                        moveMade = True
-                        squareSelected = () # resets user click
-                        playerClicks = []
-                    else:
+                    for i in range(len(validMoves)):
+                        if move == validMoves[i]:
+                            gs.makeMove(validMoves[i])
+                            moveMade = True
+                            squareSelected = () # resets user click
+                            playerClicks = []
+                    if not moveMade:
                         playerClicks = [squareSelected]
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_u:

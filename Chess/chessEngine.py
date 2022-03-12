@@ -18,6 +18,12 @@ class GameState():
 
         self.whiteToMove = True
         self.moveLog = []
+        self.whiteKingLocation = (7, 4)
+        self.blackKingLocation = (0, 4)
+        self.checkMate = False
+        self.staleMate = False
+
+
     # takes a move as a parameter
     # To Do: will need separate functions for mechanics such as promotion, en passant, castling
     def makeMove(self, move):
@@ -25,6 +31,10 @@ class GameState():
         self.board[move.endRow][move.endCol] = move.pieceMoved
         self.moveLog.append(move)
         self.whiteToMove = not self.whiteToMove
+        if move.pieceMoved == 'wK':
+            self.whiteKingLocation = (move.endRow, move.endCol)
+        elif move.pieceMoved == 'bK':
+            self.blackKingLocation = (move.endRow, move.endCol)
 
     def undoMove(self):
         if len(self.moveLog) != 0:
@@ -32,13 +42,60 @@ class GameState():
             self.board[move.startRow][move.startCol] = move.pieceMoved
             self.board[move.endRow][move.endCol] = move.pieceCaptured
             self.whiteToMove = not self.whiteToMove
+            if move.pieceMoved == 'wK':
+                self.whiteKingLocation = (move.startRow, move.startCol)
+            elif move.pieceMoved == 'bK':
+                self.blackKingLocation = (move.startRow, move.startCol)
 
     '''
     All moves considering checks
     '''
     def getValidMoves(self):
-        return self.getAllPossibleMoves()
+        # generate all possible moves
+        moves = self.getAllPossibleMoves()
+        # make every move
+        for i in range(len(moves) - 1, -1, -1):
+            self.makeMove(moves[i])
+            # generate all opponent moves
+            # for all opponent moves, check to see if your king is attacked
+            self.whiteToMove = not self.whiteToMove
+            if self.inCheck():
+                # if king is attack, then your move is not valid
+                moves.remove(moves[i])
+            self.whiteToMove = not self.whiteToMove
+            self.undoMove()
+        if len(moves) == 0:
+            if self.inCheck():
+                self.checkMate = True
+            else:
+                self.staleMate = True
+        # Important if you want to undo a move from check/stale mate
+        else:
+            self.checkMate = False
+            self.staleMate = False
+        return moves
 
+    '''
+    Determine if the player is under attack
+    '''
+    def inCheck(self):
+        if self.whiteToMove:
+            return self.squareUnderAttack(self.whiteKingLocation[0], self.whiteKingLocation[1])
+        else:
+            return self.squareUnderAttack(self.blackKingLocation[0], self.blackKingLocation[1])
+    
+    '''
+    Determines if enemy can attack square
+    '''
+    def squareUnderAttack(self, r, c):
+        self.whiteToMove = not self.whiteToMove
+        opponentMoves = self.getAllPossibleMoves()
+        self.whiteToMove = not self.whiteToMove
+        for move in opponentMoves:
+            if move.endRow == r and move.endCol == c:
+                return True
+        return False
+    
     '''
     All moves without considering check
     '''
@@ -161,7 +218,6 @@ class Move():
         self.pieceMoved = board[self.startRow][self.startCol]
         self.pieceCaptured = board[self.endRow][self.endCol]
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
-        print(self.moveID)
 
     '''
     Overriding equals method
