@@ -1,7 +1,6 @@
 ## Responsible for handling user input
 ## Fixed pygame import in macOS
 
-from ipaddress import collapse_addresses
 import pygame as p
 import chessEngine
 
